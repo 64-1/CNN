@@ -88,6 +88,46 @@ for file in os.listdir(folder_path):
 
     labels = kmeans.labels_
 
+    # Print cluster centers
+centers = kmeans.cluster_centers_
+for idx, center in enumerate(centers):
+    print(f"Cluster {idx} center: a* = {center[0]:.2f}, b* = {center[1]:.2f}")
+
+    # Reshape labels to match the image dimensions
+labels_image = labels.reshape(rgb.shape[0], rgb.shape[1])
+
+# Define colors for each cluster (you can customize these colors)
+cluster_colors = np.array([
+    [255, 255, 255],  # White for background (Cluster 0)
+    [255, 0, 0],      # Red for stained region (Cluster 1)
+    [184, 115, 51],   # Brownish for copper color (Cluster 2)
+], dtype=np.uint8)
+
+# Create an empty image to hold the segmented image
+segmented_image = cluster_colors[labels_image]
+
+# Display the segmented image
+plt.figure(figsize=(8, 8))
+plt.imshow(segmented_image)
+plt.title('Segmented Image')
+plt.axis('off')
+plt.show()
+
+# Identify the stained cluster index (e.g., cluster with highest a* value)
+stained_cluster_index = np.argmax(centers[:, 0])  # Index of cluster with highest a*
+
+print(f"The stained cluster is Cluster {stained_cluster_index}")
+
+# Create a mask for the stained region
+stained_mask = (labels == stained_cluster_index)
+
+# Extract a* values for the stained region
+stained_a_values = a[stained_mask]
+
+# Compute the average a* value
+average_a_value = np.mean(stained_a_values)
+print(f"The average a* value for the stained region is: {average_a_value:.2f}")
+
     df = pd.DataFrame({'a*': a, 'b*': b, 'Cluster': labels})
 
     # value_counts counts the number of occurences of each cluster label.
